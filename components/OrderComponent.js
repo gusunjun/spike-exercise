@@ -26,10 +26,10 @@ export default class OrderComponent extends React.Component {
 		};
 	}
 	async compilePDF() {
-		console.log('Compile PDF Functionality Yet to be Implemented');
+		//console.log('Compile PDF Functionality Yet to be Implemented');
 		// async createPDF() {
 		let options = {
-			html: '<h1>PDF TEST</h1>',
+			html: this.getOrderItems(),
 			fileName: 'test',
 			directory: 'Documents',
 		};
@@ -44,6 +44,55 @@ export default class OrderComponent extends React.Component {
 
 		//   }
 	}
+    getOrderItems() {
+		const { orders } = this.state;
+		let props = ['DUMMYDATA'];
+		let orderComponents = [];
+		for (let i = 0; i < orders.length; i++) {
+			// console.log(i);
+			// console.log(orders[i]);
+			orderComponents.push(
+				<OrderComponent
+					orderCallback={() => this.fetchData()}
+					key={i}
+					dataKey={i}
+					OrderID={orders[i].OrderID}
+					TimetoPickUp={orders[i].TimetoPickUp}
+					TotalCost={orders[i].TotalCost}
+					Status={orders[i].Status}
+					CarDescription={orders[i].CarDescription}
+					CreatedTime={orders[i].CreatedTime}
+					FoodItems={orders[i].FoodItems}
+					Role={this.Role}
+				/>
+			);
+		}
+		if (orders.length === 0) {
+			return <Text>You have no orders. Try our menu!</Text>;
+		}
+		return orderComponents;
+	}
+	//Get Receipt data
+	fetchData() {
+		fetch('https://ripple506.herokuapp.com/GetReceipt', {
+			method: 'POST',
+			headers: {
+				'Accept': '*/*',
+				'Connection': 'Keep-Alive',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ OrderID: this.props.orderID }),
+		})
+			.then((response) => response.json())
+
+			.then(async (json) => {
+				this.setState({ order: json[0] });
+				// console.log(json);
+				if (json.Status) {
+				}
+			});
+	}
+
 	changeTimetoPickUp(time) {
 		// console.log(time);
 		if (time < new Date()) {
@@ -280,3 +329,4 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 	},
 });
+
